@@ -17,7 +17,7 @@ sub new {
 	
 	my $self = {name=>$name, password=>$password, ua=>$ua};
 	bless $self, $class;
-	if ($self->login) {
+	if ($self->__login) {
 		return $self;
 	} else {
 		return undef;
@@ -53,11 +53,6 @@ sub get_info {
 	my $self = shift;
 	my %descr = @_;
 	
-	#readable
-	#writable
-	#cathegory
-	#name
-	#id
 	
 	my $cont = ((defined $descr{name}) ? $self->get_url('http://www.okoun.cz/old/boards/'.$descr{name}) : $self->get_url('http://www.okoun.cz/old/boards?boardId='.$descr{id})) or die;
 	
@@ -84,7 +79,10 @@ sub get_info {
 		$descr{booked} = 1;
 	}
 	
-
+	$cont=~/<title>klub (.*)  na Okounovi &lt;°\)\)\)&gt;&lt;<\/title>/;
+	
+	$descr{nice_name}=$1;
+	
 	my @topics;
 
 	while ($cont =~ /<a href="\/old\/topic.jsp\?topicId=([0-9]+)">/g) {
@@ -111,7 +109,8 @@ sub get_info {
 	
 }
 
-sub login {
+
+sub __login {
 	my $self = shift;
 
 	my $cont = $self->get_url('http://www.okoun.cz/old/index.jsp', 1, [login=>($self->{name}), password=>($self->{password}), doLogin=>"1", topicId=>"1"]) or return 0;
