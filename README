@@ -1,0 +1,36 @@
+perl API na čtení a posílání příspěvků na okouna, zatím ve velmi rané fázi, plus několik příkladů robotů.
+
+kód okobot.pl ujde, kód konkrétních botů je klasický perl = nečitelný.
+
+
+
+Co zatím umí [dokumentace příklady]:
+my $o = new Okobot("running", "MEGAHESLO");  
+inicializuje a naloguje bota
+
+my $o = new Okobot("running");  
+inicializuje a naloguje bota, s heslem ze souboru hesla/running.txt
+
+
+$o->all_articles("helena_vondrackova", 1000, "video"); 
+vrátí pole s referencemi na hashe s klíči id, author, datetime, title, body, seřazené od nejnovějších, se všemi články v klubu Helena Vondráčková. 1000 = max. příspěvků; když je tam 0=vrátí všechny (tj. může se vynechat)
+"video" je string, který hledám, prázdný/undef = nic nehledám
+
+$o->new_articles("helena_vondrackova"); 
+totéž, jen nové příspěvky. Je na to ale potřeba mít klub booknutý. vrací vždycky všechny.
+
+$o->book("helena_vondrackova"); 
+bookne klub
+
+$o->post("helena_vondrackova", "super video!", '<a href="http://www.youtube.com/watch?v=dXUjeljzwxM">:DD</a>', 1, $parent); 
+pošle se do klubu příspěvek. Ta 1 = html; 0 je plain, 2 je radeox. Když je $parent platné ID rodiče, pošle se jako odpověď. 
+
+Co to neumí a možná bude umět:
+úpravy vlastností klubů
+mazání příspěvků
+
+Poznámky:
+Heslo je v plaintextu (ale jelikož jde přes POST nezabezpečeně, tak je to stejně jedno)
+Je to závislé na ošklivých regexpech, protože předpokládám, že old verze okouna se moc hýbat nebude
+je potřeba modul LWP::UserAgent
+jako název klubu se dává konec URL (např. "olol_fotomontaze_%3A%29%29")
