@@ -4,6 +4,7 @@ use utf8;
 use warnings;
 use strict;
 use LWP::UserAgent;
+use Encode;
 
 sub new {
 	my $class = shift;
@@ -288,6 +289,6 @@ sub post {
 	
 	my $club_id = $1;
 	
-	$self->get_url('http://www.okoun.cz/old/postArticle.do', 1, [boardId=>$club_id, parentId=>$parent, title=>$title, email=>"", body=>$body, bodyType=>$formats{$format}]) or return 0;
+	$self->get_url('http://www.okoun.cz/old/postArticle.do', 1, [boardId=>$club_id, parentId=>$parent, title=>encode("utf8", $title), email=>"", body=>encode("utf8", $body), bodyType=>$formats{$format}]) or return 0;
 	return 1;
 }

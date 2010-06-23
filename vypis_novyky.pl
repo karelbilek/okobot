@@ -21,6 +21,25 @@ for my $name (@novyky) {
 	}
 }
 
+#extra ty, co se objevily v posledni dobe
+my $f;
+open  $f, "<", "posledni";
+my $novy_first = <$f>;
+close $f;
+
+open $f, "<", "novy_posledni";
+my $novy_last = <$f>;
+close $f;
+for my $id ($novy_first .. $novy_last) {
+	print $id."\n";
+	my %info = $o->get_info(id => $id);
+	if ($info{read_allowed}) {
+		my @articles = $o->all_articles($info{name});
+		for my $article (@articles) {
+			$howmuch{$article->{author}}->{$info{name}}++ if ($article->{author});
+		}
+	}
+}
 
 for my $author (keys %howmuch) {
 	
