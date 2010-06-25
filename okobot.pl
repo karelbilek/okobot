@@ -120,9 +120,9 @@ sub __login {
 }
 
 
-my %mesice = (leden=>0, únor=>1, březen=>2, duben=>3, květen=>4, červen=>5, červenec=>6, srpen=>7, září=>8, říjen=>9, listopad=>10, prosinec=>11);
-sub add_articles_to_hash {
-	my ($hash, $cont, $only_new) = @_;
+my %mesice = (leden=>1, únor=>2, březen=>3, duben=>4, květen=>5, červen=>6, červenec=>7, srpen=>8, září=>9, říjen=>10, listopad=>11, prosinec=>12);
+sub __add_articles_to_hash {
+	my ($hash, $cont, $only_new, $last_ref) = @_;
 	
 	my $prostredek = ($only_new) ? " posted-item-new":"";
 	
@@ -161,7 +161,7 @@ sub add_articles_to_hash {
 		my $article_body = $1;
 		my %article_hash = (id=>$article_id, author=>$author, title=>$title, body=>$article_body, @date);
 		$hash->{$article_id} = \%article_hash;
-		
+		$$last_ref = $article_id if $last_ref;
 	}
 }
 
@@ -185,7 +185,9 @@ sub all_articles {
 	my $klub = shift;
 	my $max = shift;
 	my $search = shift || "";
-	
+	my $maxyear = shift;
+	my $maxday = shift || 1;
+	my $maxmonth = shift || 1;
 	
 	my $cont = $self->get_url('http://www.okoun.cz/old/boards/'.$klub."?searchedStrings=".$search) or return ();
 	
@@ -193,8 +195,9 @@ sub all_articles {
 	my %articles_hash;
 	
 	my $stop;
+	my $last;
 	do {
-		add_articles_to_hash(\%articles_hash, $cont);
+		__add_articles_to_hash(\%articles_hash, $cont, 0, \$last);
 		
 		if ($cont =~ /<a href="([^"]*)">Starší<\/a>/) {
 			
@@ -206,20 +209,69 @@ sub all_articles {
 		if ($max and scalar keys %articles_hash >= $max) {
 			$stop = 1;
 		}
-		$|=1;
+		
+		if ($maxyear 
+			and 
+				(
+					(($articles_hash{$last}->{year}) < $maxyear)
+				or 
+					(($articles_hash{$last}->{year}) == $maxyear
+					and 
+					($articles_hash{$last}->{month}) < $maxmonth)
+				or
+					(($articles_hash{$last}->{year}) == $maxyear
+					and 
+					($articles_hash{$last}->{month}) == $maxmonth
+					and
+					($articles_hash{$last}->{day}) < $maxday))) {
+			$stop=1;
+		}
+		
 	} until ($stop);
 	
 	#hack for oldest page
-	if (!$max or scalar keys %articles_hash < $max) {
+	if ((!$max or scalar keys %articles_hash < $max) 
+		and 
+		(!$maxyear or (
+			(($articles_hash{$last}->{year}) > $maxyear)
+		or 
+			(($articles_hash{$last}->{year}) == $maxyear
+			and 
+			($articles_hash{$last}->{month}) > $maxmonth)
+		or
+			(($articles_hash{$last}->{year}) == $maxyear
+			and 
+			($articles_hash{$last}->{month}) == $maxmonth
+			and
+			($articles_hash{$last}->{day}) >= $maxday)))) {
 		$cont = $self->get_url('http://www.okoun.cz/old/boards/'.$klub.'?f=0&searchedStrings='.$search) or return ();
-		add_articles_to_hash(\%articles_hash, $cont);
+		__add_articles_to_hash(\%articles_hash, $cont);
 	}
 	my @keys = sort {$b<=>$a} keys %articles_hash;
 	
 	if (scalar @keys == 0) {
 		return ();
 	}
-	return @articles_hash{@keys[0..($max?($max-1):$#keys)]};
+	my @res = @articles_hash{@keys[0..($max?($max-1):$#keys)]};
+	
+	if ($maxyear) {
+		@res = grep {(
+			($_->{year}) > $maxyear)
+		or 
+			(($_->{year}) == $maxyear
+			and 
+			($_->{month}) > $maxmonth)
+		or
+			(($_->{year}) == $maxyear
+			and 
+			($_->{month}) == $maxmonth
+			and
+			($_->{day}) >= $maxday)
+		} @res;
+	}
+	
+	
+	return @res;
 		
 }
 
@@ -251,7 +303,7 @@ sub new_articles {
 		my $first=1;
 		
 		do {
-			add_articles_to_hash(\%articles_hash, $cont, $first);
+			__add_articles_to_hash(\%articles_hash, $cont, $first);
 			$first=0;
 				
 				#tady jdu od starsich k novejsim
