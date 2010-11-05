@@ -21,6 +21,7 @@ sub new {
 	if ($self->__login) {
 		return $self;
 	} else {
+		print "CANNOT DO\n";
 		return undef;
 	}
 }
@@ -40,14 +41,23 @@ sub get_new_favourites {
 }
 
 sub get_url {
+	
 	my ($self, $url, $post, $post_array) = @_;
-	my $response = ($post) ? ($self->{ua}->post($url, $post_array)) : ($self->{ua}->get($url));
+	my $tries = 0;
+	while ($tries<5) {
+		my $res = undef;
+		eval {
+			my $response = ($post) ? ($self->{ua}->post($url, $post_array)) : ($self->{ua}->get($url));
 
-	if ($response->is_success) {
-		return $response->decoded_content;
-	} else {
-		return undef;
+			if ($response->is_success) {
+				
+				$res = $response->decoded_content;
+			}
+		};
+		return $res if $res;
+		$tries++;
 	}
+	return undef;
 }
 
 sub get_info {
@@ -210,7 +220,7 @@ sub all_articles {
 			$stop = 1;
 		}
 		
-		if ($maxyear 
+		if ($last and $maxyear 
 			and 
 				(
 					(($articles_hash{$last}->{year}) < $maxyear)
@@ -232,7 +242,7 @@ sub all_articles {
 	#hack for oldest page
 	if ((!$max or scalar keys %articles_hash < $max) 
 		and 
-		(!$maxyear or (
+		(!$maxyear or !$last or (
 			(($articles_hash{$last}->{year}) > $maxyear)
 		or 
 			(($articles_hash{$last}->{year}) == $maxyear
