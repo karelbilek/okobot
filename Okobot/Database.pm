@@ -482,7 +482,10 @@ sub merge_classes {
 		my $firstvys =  ($cons->{$clubA}{$best}||0) + ($cons->{$best}{$clubA}||0);
 		my $secondvys =  ($cons->{$clubA}{$secbest}||0) +($cons->{$secbest}{$clubA}||0);
 		
-		my $vys = ($firstvys + $secondvys)/2;
+		my $firstweight = count_splitsize($best);
+		my $secondweight = count_splitsize($secbest);
+		
+		my $vys = ($firstvys*$firstweight + $secondvys*$secondweight)/($firstweight + $secondweight); 
 		
 		delete $cons->{$clubA}{$secbest};
 		delete $cons->{$clubA}{$best};
