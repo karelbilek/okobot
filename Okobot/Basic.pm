@@ -1,5 +1,6 @@
-package Okobot;
+package Okobot::Basic;
 
+use 5.010;
 use utf8;
 use warnings;
 use strict;
@@ -31,9 +32,10 @@ sub get_new_favourites {
 	
 	my @res;
 	
-	my $cont = $self->get_url('http://www.okoun.cz/old/favourites.jsp?new=1') or return ();
+	my $cont = $self->get_url('http://www.okoun.cz/favourites.jsp?new=1') or return ();
 	
-	while ($cont =~ /<a href="\/old\/boards\/([^"]*)"><span class="board-name">/g) {
+	
+	while ($cont =~ /<a class="name" href="\/boards\/([^"]*)"/g) {
 		push @res, $1;
 	}
 	
@@ -73,7 +75,7 @@ sub get_info {
 	
 	if (defined $descr{name}) {
 		
-		($cont =~ /<input type="hidden" name="shownBoardId\(([0-9]+)\)" value="n">/) or die;
+		($cont =~ /<input type="hidden" name="shownBoardId\(([0-9]+)\)" value="/) or die;
 		
 		$descr{id} = $1;
 	} else {
@@ -129,20 +131,41 @@ sub __login {
 	return ($cont=~/vitaj!/); #lol
 }
 
+sub get_article {
+	my $self = shift;
+	my $club_descr = shift;
+	my $article_id = shift;
+	
+	my $url = (defined $club_descr->{name}) ? ('http://www.okoun.cz/old/boards/'.$club_descr->{name}.'?contextId='.$article_id)  : ('http://www.okoun.cz/old/boards?boardId='.$club_descr->{id}.'&contextId='.$article_id);
+	my $cont = $self->get_url($url) or return undef;
+	
+	my %articles_hash;
+	__add_articles_to_hash(\%articles_hash, $cont);
+	
+	return $articles_hash{$article_id};
+	
+	
+}
+
 
 my %mesice = (leden=>1, únor=>2, březen=>3, duben=>4, květen=>5, červen=>6, červenec=>7, srpen=>8, září=>9, říjen=>10, listopad=>11, prosinec=>12);
 sub __add_articles_to_hash {
 	my ($hash, $cont, $only_new, $last_ref) = @_;
 	
+	
+	$cont=~/<h2 class="name">klub <a href="\/old\/boards\/([^\/]*)">/;
+	my $clubname = $1;
+	
 	my $prostredek = ($only_new) ? " posted-item-new":"";
 	
-	my $regex = '<div id="article-([0-9]*)".?\n[^c]*class="article item posted-item'.$prostredek.'(.*?)(<\/div>[^<]*<div class="context">[^<]*<a href="\/old\/boards\/[^"]*" onclick="[^"]*">[^<]*<\/a>[^<]*)?<\/div>[^<]*<\/div>[^<]*(<br class="separator" \/>|<\/form>[^<]*<ul class="pager">)';
+	my $regex = '<div id="article-([0-9]*)".?\n[^c]*class="article item posted-item'.$prostredek.'(.*?)(<\/div>[^<]*<div class="context">[^<]*<a href="\/old\/boards\/(?<reply>[^"]*)" onclick="[^"]*">[^<]*<\/a>[^<]*)?<\/div>[^<]*<\/div>[^<]*(<br class="separator" \/>|<\/form>[^<]*<ul class="pager">)';
 	
 	
 	while ($cont =~ /$regex/sg) {
 		
 		my $article_id = $1;
 		my $article_mess = $2;
+		my $reply_all = $+{reply};
 		
 	
 		my $author;
@@ -169,7 +192,16 @@ sub __add_articles_to_hash {
 								#aby nezacinal a nekoncil otravnym whitespace
 		$article_mess =~ /<div class="body">\s*(\S.*\S)\s*$/s;
 		my $article_body = $1;
-		my %article_hash = (id=>$article_id, author=>$author, title=>$title, body=>$article_body, @date);
+		
+		
+		my %article_hash = (id=>$article_id, author=>$author, title=>$title, body=>$article_body, clubname=>$clubname, @date);
+		
+		
+		if (defined $reply_all and $reply_all=~/contextId=(.*)#/) {
+			
+			$article_hash{reply} = $1;
+		}
+		
 		$hash->{$article_id} = \%article_hash;
 		$$last_ref = $article_id if $last_ref;
 	}
@@ -290,20 +322,26 @@ sub new_articles {
 	my $klub = shift;
 	
 			#abych mohl sledovat nove, musim to mit bukle
-	my $cont = $self->get_url('http://www.okoun.cz/old/favourites.jsp?new=1') or return ();
+	my $cont_fav = $self->get_url('http://www.okoun.cz/favourites.jsp?new=1') or return ();
 	
 	my $klub_reg = $klub;
-	$klub_reg =~ s/([\.\\\^\|\(\)\[\]\*\?\+\{\}])/\\$1/;
+	$klub_reg =~ s/([\.\\\^\|\(\)\[\]\*\?\+\{\}])/\\$1/g;
 		#budu to strkat do regexpu, ale zas na odkaz to chci bez toho
 	
-	my $regex = '<a href="\/old\/boards\/'.$klub_reg.'"><span class="board-name">';
-	
-	
-	if ($cont=~/$regex/) {
-		#mam nove prispevky. Jeste ale nevim, jestli "vicestrankove" nebo ne.
+	# my $regex = '<a href="\/old\/boards\/'.$klub_reg.'"><span class="board-name">';
+	# 
+	# 
+	# if ($cont=~/$regex/) {
 		
-		$regex = '<a href="(\/old\/boards\/'.$klub_reg.'\?f=[0-9]+-[0-9]+)">Nejstar';
-		my $besturl = ($cont =~ /$regex/) ? ('http://www.okoun.cz'.$1) : ('http://www.okoun.cz/old/boards/'.$klub);
+		
+		my $regex = '<a class="name" href="\/boards\/'.$klub_reg.'">[^<]*<\/a>\s*\([^\/]*\/<b><a href="([^\"]*)">';
+		
+		if ($cont_fav!~/$regex/) {
+			return ();
+		}
+		$cont_fav =~ /$regex/;
+		
+		my $besturl = "http://www.okoun.cz/old".$1;
 		
 		my %articles_hash;
 		
@@ -328,10 +366,10 @@ sub new_articles {
 		
 		
 		return @articles_hash{sort {$b<=>$a} keys %articles_hash};
-	
-	} else {
-		return ();
-	} 
+	# 
+	# } else {
+	# 	return ();
+	# } 
 }
 
 
@@ -354,3 +392,5 @@ sub post {
 	$self->get_url('http://www.okoun.cz/old/postArticle.do', 1, [boardId=>$club_id, parentId=>$parent, title=>encode("utf8", $title), email=>"", body=>encode("utf8", $body), bodyType=>$formats{$format}]) or return 0;
 	return 1;
 }
+
+1;
