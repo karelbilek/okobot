@@ -350,18 +350,8 @@ sub club_connections {
 			for my $clubB (keys %{$counts->{$id}}) {
 				if ($clubA ne '' and $clubB ne '' and $clubA lt $clubB) {
 					
-					my $add = log($counts->{$id}->{$clubA}*$counts->{$id}->{$clubB});
-					if ($add) {
-						$cons{$clubA}{$clubB}+=$add;
-					}
-					
-					# my $add = ($counts->{$id}->{$clubA} < $counts->{$id}->{$clubB}) ? $counts->{$id}->{$clubA} : $counts->{$id}->{$clubB};
-					# $cons{$clubA}{$clubB}+=$add;
-					
-					# 
-					# 
-					# $cons{$clubA}{$clubB}+=$counts->{$id}->{$clubA};
-					# $cons{$clubA}{$clubB}+=$counts->{$id}->{$clubB};
+					$cons{$clubA}{$clubB}+=$counts->{$id}->{$clubA};
+					$cons{$clubA}{$clubB}+=$counts->{$id}->{$clubB};
 					
 				}
 			}
@@ -433,47 +423,25 @@ sub merge_classes {
 	my $classes_average = shift;
 	my $add_by_merging = shift;
 	my $bigplus = 100;
-	for my $clubA (sort {$a cmp $b} keys %$cons) {
-		for my $clubB (keys %{$cons->{$clubA}}) {
-			if (!exists $add_by_merging->{$clubA}{$clubB}) {
-				my $size_a = (count_splitsize($clubA));
-				my $size_b = (count_splitsize($clubB));
-			
-				my $edges_a = edgecount($size_a);
-				my $edges_b = edgecount($size_b);
-			
-			
-				my $avg_a = ($classes_average->{$clubA} || $bigplus);
-				my $avg_b = ($classes_average->{$clubB} || $bigplus);
-			
-				my $con = $cons->{$clubA}{$clubB};
-			
-										#			5000 * 1   + 11000*1 + 30000 / 3
-				$add_by_merging->{$clubA}{$clubB} = ($avg_a*$edges_a + $avg_b*$edges_b + $con)/($edges_a + $edges_b + $size_a*$size_b) - $avg_a - $avg_b;
-			}
-			
-		}
-	}
-	
 	
 	my $biggerminus = -(9**9**9);
 	
-	my %bests; #sort {$a cmp $b} 
+	my %bests; #sort je tady a o kus niz jenom proto, aby to 2x po sobe vyslo stejne. pokud o to nejde, muze se to nechat by
 	for my$clubA (keys %$cons) {
 		my $best;
 		my $max=$biggerminus;
 		for my $clubB (keys %{$cons->{$clubA}}) {
-			if ($add_by_merging->{$clubA}{$clubB} > $max) {
-				$max = $add_by_merging->{$clubA}{$clubB};
+			if ($cons->{$clubA}{$clubB} > $max) {
+				$max = $cons->{$clubA}{$clubB};
 				$best = $clubB;
 			}
 		}		
-		$bests{$clubA} = $best."|".$add_by_merging->{$clubA}{$best};
+		$bests{$clubA} = $best."|".$cons->{$clubA}{$best};
 	}
 	
 	my $best;
 	my $secbest;
-	my $max=$biggerminus; #sort {$a cmp $b} 
+	my $max=$biggerminus; # 
 	for my $candidate (keys %bests) {
 		$bests{$candidate}=~/^(.*)\|(-?\d*\.?\d*e?-?\d*)$/;
 		if (!$2) {
@@ -514,7 +482,7 @@ sub merge_classes {
 		my $firstvys =  ($cons->{$clubA}{$best}||0) + ($cons->{$best}{$clubA}||0);
 		my $secondvys =  ($cons->{$clubA}{$secbest}||0) +($cons->{$secbest}{$clubA}||0);
 		
-		my $vys = $firstvys + $secondvys;
+		my $vys = ($firstvys + $secondvys)/2;
 		
 		delete $cons->{$clubA}{$secbest};
 		delete $cons->{$clubA}{$best};
