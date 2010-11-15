@@ -350,8 +350,7 @@ sub club_connections {
 			for my $clubB (keys %{$counts->{$id}}) {
 				if ($clubA ne '' and $clubB ne '' and $clubA lt $clubB) {
 					
-					$cons{$clubA}{$clubB}+=$counts->{$id}->{$clubA};
-					$cons{$clubA}{$clubB}+=$counts->{$id}->{$clubB};
+					$cons{$clubA}{$clubB}+=$counts->{$id}->{$clubA} * $counts->{$id}->{$clubB};
 					
 				}
 			}
