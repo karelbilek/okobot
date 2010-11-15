@@ -74,7 +74,7 @@ my $clubs_connections = Okobot::Database::club_connections($id_hash);
 say scalar Okobot::Database::get_classes_names($clubs_connections);
 #pocet trid
 
-# my $basic = new Okobot::Basic("statbot");
+my $basic = new Okobot::Basic("statbot");
 my $spoje={}; my $w={};
 my $res="";
 for (1..200) {
@@ -91,7 +91,7 @@ for (1..200) {
 
 
 
-say Okobot::Database::get_joined_classes_names( $clubs_connections, $spoje);
+say Okobot::Database::get_joined_classes_names($basic, $clubs_connections, $spoje);
 #na vypis HTML
 
 

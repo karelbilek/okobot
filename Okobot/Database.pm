@@ -360,7 +360,7 @@ sub club_connections {
 }
 
 sub get_joined_classes_names {
-	# my $basic = shift;
+	my $basic = shift;
 	#basic je potreba k vypisovani "hezkych" nazvu klubu - nechci pouzivat toho sameho bota, jako na database
 	#protoze by mi mohl odnovit neco, co odnovit nechci :)
 	
@@ -377,14 +377,18 @@ sub get_joined_classes_names {
 			my @clubs = split(/\+/, $line);
 			$res.="<tr><td>".($i++)."</td><td>";
 			
-			# hezky vypis klubu
-			# for my $club_ugly (@clubs) {
-			# 	my %cl = $basic->get_info(name=>$club_ugly);
-			# 	my $nice = $cl{nice_name};
-			# 	$res.="<a href=\"http://www.okoun.cz/boards/".$club_ugly."\">".$nice."</a> ";
-			# }
+			if ($basic) {
+				# hezky vypis klubu
+				for my $club_ugly (@clubs) {
+					my %cl = $basic->get_info(name=>$club_ugly);
+					my $nice = $cl{nice_name};
+					$res.="<a href=\"http://www.okoun.cz/boards/".$club_ugly."\">".$nice."</a> ";
+				}
+			} else {
+				$res .= join (" - ", @clubs);
+				
+			}
 			
-			$res .= join (" - ", @clubs);
 			$res.="</td></tr>\n";
 		}
 		$res.="</table>";
