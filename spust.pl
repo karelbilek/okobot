@@ -65,7 +65,8 @@ my $id_hash;
 
 
 my $clubs_connections = Okobot::Database::club_connections($id_hash);
-#my $id_connections = Okobot::Database::club_connections($clubs_hash);
+
+my $id_connections = Okobot::Database::club_connections($clubs_hash);
 #tohle neni chyba :)
 #pokud chci pribuznost klubu, potrebuju clubs_connections, co pak predavam merge_classes, ktera spojuje vrcholy k sobe
 
@@ -74,25 +75,40 @@ my $clubs_connections = Okobot::Database::club_connections($id_hash);
 say scalar Okobot::Database::get_classes_names($clubs_connections);
 #pocet trid
 
-my $basic = new Okobot::Basic("statbot");
-my $spoje={}; my $w={};
-my $res="";
-for (1..200) {
+{
+	my $basic = new Okobot::Basic("statbot");
+	my $spoje={}; my $w={};
+	for (1..200) {
 	
-	Okobot::Database::merge_classes($clubs_connections, $spoje, $w);
-	#spoje - na hodnoceni "sily" spojeni vrcholu
-	#podle toho to pak nakonec radim
+		Okobot::Database::merge_classes($clubs_connections, $spoje, $w);
+		#spoje - na hodnoceni "sily" spojeni vrcholu
+		#podle toho to pak nakonec radim
 	
 		
+	}
+
+
+
+
+	say Okobot::Database::get_joined_classes_names($basic, $clubs_connections, $spoje);
 }
 
+{
+	my $spoje={}; my $w={};
+	for (1..200) {
+	
+		Okobot::Database::merge_classes($id_connections, $spoje, $w);
+		#spoje - na hodnoceni "sily" spojeni vrcholu
+		#podle toho to pak nakonec radim
+	
+		
+	}
 
-#Okobot::Database::classes_graph($res);
 
 
 
-say Okobot::Database::get_joined_classes_names($basic, $clubs_connections, $spoje);
-#na vypis HTML
+	say Okobot::Database::get_joined_classes_names(0, $id_connections, $spoje);
+}
 
 
 

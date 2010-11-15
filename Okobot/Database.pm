@@ -427,7 +427,7 @@ sub merge_classes {
 	my $add_by_merging = shift;
 	my $bigplus = 100;
 	
-	my $biggerminus = -(9**9**9);
+	my $biggerminus = -100;
 	
 	my %bests; #sort je tady a o kus niz jenom proto, aby to 2x po sobe vyslo stejne. pokud o to nejde, muze se to nechat by
 	for my$clubA (keys %$cons) {
