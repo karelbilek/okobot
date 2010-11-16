@@ -457,9 +457,7 @@ sub merge_classes {
 		}
 	}
 	$classes_average->{$best."+".$secbest}= ($classes_average->{$best} || 0) + ($classes_average->{$secbest} || 0) + $max;
-	
-	say "Best je velky $max";
-	
+		
 	my @neighbours;
 	{
 		my %helphash;

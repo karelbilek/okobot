@@ -88,9 +88,12 @@ say scalar Okobot::Database::get_classes_names($clubs_connections);
 	}
 
 
-
-
 	say Okobot::Database::get_joined_classes_names($basic, $clubs_connections, $spoje);
+	
+	while (scalar Okobot::Database::get_classes_names($clubs_connections) >= 2) {
+		Okobot::Database::merge_classes($clubs_connections, $spoje, $w);
+		
+	}
 }
 
 {
@@ -108,6 +111,11 @@ say scalar Okobot::Database::get_classes_names($clubs_connections);
 
 
 	say Okobot::Database::get_joined_classes_names(0, $id_connections, $spoje);
+	
+	while (scalar Okobot::Database::get_classes_names($id_connections) >= 2) {
+		Okobot::Database::merge_classes($id_connections, $spoje, $w);
+		
+	}
 }
 
 
