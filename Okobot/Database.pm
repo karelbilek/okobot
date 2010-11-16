@@ -456,7 +456,7 @@ sub merge_classes {
 			$secbest=$1;
 		}
 	}
-	$classes_average->{$best."+".$secbest}= ($classes_average->{$best} || 0) + ($classes_average->{$secbest} || 0) + $max;
+	$classes_average->{$best."+".$secbest}= $max;
 		
 	my @neighbours;
 	{
