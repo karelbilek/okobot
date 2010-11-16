@@ -49,23 +49,24 @@ my $id_hash;
 	print "pred\n";
 
 	eval($dumper);
-	
+
 	#na smazani pod 100 prispevku ... nevyplatilo se moc
 	#Okobot::Database::remove_naplav($VAR1, 100);
-	
+
 	for my $a (keys %$VAR1) {
 		for my $b (keys %{$VAR1->{$a}}) {
 			$clubs_hash->{$b}{$a} = $VAR1->{$a}{$b};
 		}
 	}
-	
+
 	$id_hash = $VAR1;
-	
+
 }
 
 
 my $clubs_connections = Okobot::Database::club_connections($id_hash);
-#my $id_connections = Okobot::Database::club_connections($clubs_hash);
+
+my $id_connections = Okobot::Database::club_connections($clubs_hash);
 #tohle neni chyba :)
 #pokud chci pribuznost klubu, potrebuju clubs_connections, co pak predavam merge_classes, ktera spojuje vrcholy k sobe
 
@@ -74,28 +75,45 @@ my $clubs_connections = Okobot::Database::club_connections($id_hash);
 say scalar Okobot::Database::get_classes_names($clubs_connections);
 #pocet trid
 
-# my $basic = new Okobot::Basic("statbot");
-my $spoje={}; my $w={};
-my $res="";
-for (1..200) {
-	
-	Okobot::Database::merge_classes($clubs_connections, $spoje, $w);
-	#spoje - na hodnoceni "sily" spojeni vrcholu
-	#podle toho to pak nakonec radim
-	
-		
+{
+	my $basic = new Okobot::Basic("statbot");
+	my $spoje={}; my $w={};
+	for (1..200) {
+
+		Okobot::Database::merge_classes($clubs_connections, $spoje, $w);
+		#spoje - na hodnoceni "sily" spojeni vrcholu
+		#podle toho to pak nakonec radim
+
+
+	}
+
+
+	say Okobot::Database::get_joined_classes_names($basic, $clubs_connections, $spoje);
+
+	while (scalar Okobot::Database::get_classes_names($clubs_connections) >= 2) {
+		Okobot::Database::merge_classes($clubs_connections, $spoje, $w);
+
+	}
 }
 
+{
+	my $spoje={}; my $w={};
+	for (1..200) {
 
-#Okobot::Database::classes_graph($res);
+		Okobot::Database::merge_classes($id_connections, $spoje, $w);
+		#spoje - na hodnoceni "sily" spojeni vrcholu
+		#podle toho to pak nakonec radim
+
+
+	}
 
 
 
-say Okobot::Database::get_joined_classes_names( $clubs_connections, $spoje);
-#na vypis HTML
 
+	say Okobot::Database::get_joined_classes_names(0, $id_connections, $spoje);
 
+	while (scalar Okobot::Database::get_classes_names($id_connections) >= 2) {
+		Okobot::Database::merge_classes($id_connections, $spoje, $w);
 
-# 
-# 
-# Okobot::Database::top_vsestrannost($VAR1, "vsestrannost.html");
+	}
+}
