@@ -6,6 +6,8 @@ Okobot::Basic - základní "bot" - umí chodit po okounu, sbírat články, vypi
 
 Okobot::Database - bot, co umí jednak číst a ukládat do "databáze", jednak potom z ní generovat soubor "počtů" - tj. kdo kam jak přispíval, a potom z NĚJ ty různé tabulky/statistiky. Je to poměrně prasácké, různé funkce různě vrací / vypisují na STDIN / vypisují do souboru to, co mě zrovna napadlo (HTML tabulky apod), některé funkce tahají z databáze, některé z hashe počtů (který se musí načíst přes eval ze souboru "pocty").
 
+Okobot::Grapher je pomocný modulek pro kreslení grafů, abych to neprasil do Database.
+
 Spouštěl jsem to přes soubor spust.pl, kde jsou různě zakomentované řádky podle toho, co jsem zrovna spouštěl (nějak čistit to taky nehodlám, sorry).
 
 
