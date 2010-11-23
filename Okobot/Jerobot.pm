@@ -55,7 +55,7 @@ sub clean_short {
 		@s = @$VAR1;
 	}
 	
-	@s = map {$_->{body}=~s/<[^<]*>//g; $_};
+	@s = map {$_->{body}=~s/<[^<]*>//g; $_} @s;
 	@s = grep {splitsize($_->{body})>=10} @s;
 	{
 		open my $f, ">", "jerome.out2";
