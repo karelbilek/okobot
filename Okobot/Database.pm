@@ -116,6 +116,18 @@ sub article_filename {
 	return $s->dir_dbase."/".$1."/".$2."/".$id;
 }
 
+sub get_article {
+	my $s = shift;
+	my $what = shift;
+	my $fname = $s->article_filename($what);
+	open my $inf, "<", $fname;
+	my $VAR1;
+	my $dumped = join ("", <$inf>);
+	close $inf;
+	eval($dumped);
+	return $VAR1;
+}
+
 sub save_article {
 	my $s = shift;
 	my $article = shift;
