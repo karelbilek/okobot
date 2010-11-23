@@ -120,7 +120,12 @@ sub get_article {
 	my $s = shift;
 	my $what = shift;
 	my $fname = $s->article_filename($what);
+	unless (-e $fname) {
+		say "OLOL $fname";
+		return undef;
+	}
 	open my $inf, "<", $fname;
+	
 	my $VAR1;
 	my $dumped = join ("", <$inf>);
 	close $inf;
