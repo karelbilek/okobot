@@ -4,4 +4,4 @@ use utf8;
 use 5.010;
 use Okobot::Jerobot;
 
-Okobot::Jerobot::get_all;
+Okobot::Jerobot::clean_short;
