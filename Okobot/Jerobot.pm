@@ -8,7 +8,7 @@ use Data::Dumper;
 sub get_all {
 	my @arts;
 	my $d = new Okobot::Database("bot_almighty");
-	Okobot::Database::do_for_all(sub{
+	$d->do_for_all(sub{
 		my $a = shift;
 		if ($a->{author} eq "JeromeHeretic") {
 			push (@arts, $a);
