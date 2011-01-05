@@ -3,6 +3,8 @@ package Okobot::Database;
 use 5.010;
 
 use Okobot::Basic;
+use Okobot::Grapher;
+
 use warnings;
 use strict;
 use Data::Dumper;
@@ -51,55 +53,57 @@ sub remove_naplav {
 	}
 }
 
-sub classes_graph {
-	my $text = shift;
+sub do_graph {
+	my $cons = shift;
+	my $clubs_hash = shift;
 	
-	
-	my %nodes; #nazev tridy -> node
-	my %named;
-	
-	
-	my $maxnode=0;
-	my @text = split(/\n/, $text);
-	for (@text) {
-		chomp;
-		/^(.*) -> (.*)$/;
-	
-		if (!$nodes{$1}) {
-			$nodes{$1}=++$maxnode;
-			$named{$1}=undef;
+	my %counts;
+	for my $club (keys %$clubs_hash) {
+		for my $auth (keys %{$clubs_hash->{$club}}) {
+			$counts{$club}+=$clubs_hash->{$club}->{$auth};
 		}
-		if (!$nodes{$2}) {
-			$nodes{$2}=++$maxnode;
-			$named{$2}=undef;
-		}
-		$nodes{$1."+".$2}=++$maxnode;
 	}
 	
-	print "digraph p{\n
-		graph [rankdir=\"BT\"]\n";
-	for (keys %nodes) {
-		if (exists $named{$_}) {
-			#if ($ARGV[1]) {
-				#print "node".$nodes{$_}." [label=\"".$_."\" width=\"".$ARGV[1]."\" fixedsize=\"true\"]";
-			#} else {
-				print "node".$nodes{$_}." [label=\"".$_."\"]";
-			#}
-		} else {
-				print "node".$nodes{$_}." [label=\"\" shape=\"none\" width=\"0\" height=\"0\"]";
+	my $g = new Okobot::Grapher;
+	
+	for my $club (keys %counts) {
+		$g->set_weight($club, (sqrt($counts{$club}))/10 );
+	}
+	
+	for my $first (keys %$cons) {
+		for my $second (keys %{$cons->{$first}}) {
+			if (exists $clubs_hash->{$first} and exists $clubs_hash->{$second}) {
+				$g->add_connection($first, $second,100000/(($cons->{$first}->{$second})*100));
+			}
 		}
-
-		print "\n";
 	}
-
-	for (@text) {
-		/^(.*) -> (.*)$/;
-		print "node".$nodes{$1}." -> node".$nodes{$1."+".$2}." [arrowhead=\"none\"]\n";
-		print "node".$nodes{$2}." -> node".$nodes{$1."+".$2}." [arrowhead=\"none\"]\n";
-	}
-	print "}";
+	
+	$g->do_graph(1,0);
 }
 
+
+sub clean_lower_half {
+	my $cons = shift;
+	
+	my @arr;
+	
+	for my $first (keys %$cons) {
+		for my $second (keys %{$cons->{$first}}) {
+			push @arr, $cons->{$first}{$second};
+		}
+	}
+	@arr = sort {$b<=>$a} @arr;
+	my $minimum = $arr[@arr/ 4]; #/2;
+	say "Minimum je $minimum";
+	
+	for my $first (keys %$cons) {
+		for my $second (keys %{$cons->{$first}}) {
+			if ($cons->{$first}{$second}<$minimum) {
+				delete $cons->{$first}{$second};
+			}
+		}
+	}
+}
 
 sub article_filename {
 	my $s = shift;
