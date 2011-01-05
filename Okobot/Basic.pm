@@ -222,6 +222,23 @@ sub book {
 	return 1;
 }
 
+sub recent_articles {
+	my $s = shift;
+	my $klub = shift;
+	my $days = shift;
+	
+	my @timeData = localtime(time - $days * 24 * 60 * 60);
+	my $day = $timeData[3];
+	my $month = $timeData[4]+1;
+	my $year = $timeData[5]+1900;
+	
+	my @art = $s->all_articles($klub, undef, undef, $year, $day, $month);
+	
+	use Data::Dumper;
+	
+	print Dumper(\@art);
+}
+
 sub all_articles {
 	my $self = shift;
 	my $klub = shift;
