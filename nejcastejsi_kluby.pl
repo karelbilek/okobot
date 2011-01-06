@@ -32,6 +32,6 @@ for my $id (keys %$clubs_hash) {
 }
 
 my @r = sort {$pocty_klubu{$b}<=>$pocty_klubu{$a}} keys %pocty_klubu;
-@r = @r[0..50];
+@r = @r[0..100];
 
 for (@r) {say $_}
