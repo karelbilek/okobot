@@ -45,6 +45,7 @@ sub get_new_favourites {
 sub get_url {
 	
 	my ($self, $url, $post, $post_array) = @_;
+	say "Getting url $url";
 	my $tries = 0;
 	while ($tries<5) {
 		my $res = undef;
@@ -167,8 +168,15 @@ sub __add_articles_to_hash {
 		my $article_mess = $2;
 		my $reply_all = $+{reply};
 		
+		my $author_icon_num;
+		my $author_icon_name;
+		if ($article_mess =~ /src="\/ico\/[^\?]*\?l=([^&]*)&amp;i=([0-9]*)" class="user-icon"/) {
+			$author_icon_num = $2;
+			$author_icon_name = $1;
+		}
 	
 		my $author;
+		
 		if ($article_mess =~ /<span class="author row">\s*(.*?)\s*(<span class="author-|\.\.\.)/) {
 			my $author_maybe = $1;
 			if ($author_maybe =~ /<!-- anonym -->/) {
@@ -194,7 +202,7 @@ sub __add_articles_to_hash {
 		my $article_body = $1;
 		
 		
-		my %article_hash = (id=>$article_id, author=>$author, title=>$title, body=>$article_body, clubname=>$clubname, @date);
+		my %article_hash = (id=>$article_id, author=>$author, author_icon_num=>$author_icon_num, author_icon_name=>$author_icon_name, title=>$title, body=>$article_body, clubname=>$clubname, @date);
 		
 		
 		if (defined $reply_all and $reply_all=~/contextId=(.*)#/) {
@@ -245,9 +253,10 @@ sub all_articles {
 	my $maxday = shift || 1;
 	my $maxmonth = shift || 1;
 	
-	say "year $maxyear month $maxmonth day $maxday";
+	#say "year $maxyear month $maxmonth day $maxday";
 	
 	my $cont = $self->get_url('http://www.okoun.cz/old/boards/'.$klub."?searchedStrings=".$search) or return ();
+	
 	
 	
 	my %articles_hash;

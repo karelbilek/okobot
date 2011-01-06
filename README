@@ -10,5 +10,4 @@ Okobot::Grapher je pomocný modulek pro kreslení grafů, abych to neprasil do D
 
 Spouštěl jsem to přes soubor spust.pl, kde jsou různě zakomentované řádky podle toho, co jsem zrovna spouštěl (nějak čistit to taky nehodlám, sorry).
 
-
-pokus
+Okobot::BestArticle je automatický okoun kompressor.
