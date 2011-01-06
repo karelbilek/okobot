@@ -232,11 +232,8 @@ sub recent_articles {
 	my $month = $timeData[4]+1;
 	my $year = $timeData[5]+1900;
 	
-	my @art = $s->all_articles($klub, undef, undef, $year, $day, $month);
 	
-	use Data::Dumper;
-	
-	print Dumper(\@art);
+	return $s->all_articles($klub, undef, undef, $year, $day, $month);
 }
 
 sub all_articles {
@@ -247,6 +244,8 @@ sub all_articles {
 	my $maxyear = shift;
 	my $maxday = shift || 1;
 	my $maxmonth = shift || 1;
+	
+	say "year $maxyear month $maxmonth day $maxday";
 	
 	my $cont = $self->get_url('http://www.okoun.cz/old/boards/'.$klub."?searchedStrings=".$search) or return ();
 	
