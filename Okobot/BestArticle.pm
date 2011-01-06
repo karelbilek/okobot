@@ -29,14 +29,14 @@ sub fce {
 	#return 1;
 	
 	#odstupnovane
-	#return 1/(2**($n-1));
+	return 1/(2**($n-1));
 
 	#arnostovo upravene
-	if ($n<4) {
-		return 1;
-	} else {
-		return 0;
-	}
+	#if ($n<4) {
+	#	return 1;
+	#} else {
+	#	return 0;
+	#}
 }
 
 sub best_articles {
@@ -44,7 +44,7 @@ sub best_articles {
 	my $klub = shift;
 	my $days = shift;
 	
-	say "nalogovano";
+	say "go club $klub";
 	my @articles = $obot->recent_articles($klub, $days);
 	say "stahnuto, pocitam...";
 	
