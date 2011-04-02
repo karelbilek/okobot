@@ -27,6 +27,14 @@ sub new {
 	}
 }
 
+sub set_new_popisek {
+	my $self = shift;
+	my $what = shift;
+	
+	#funguje jenom na me (tj. ID running). je to jenom jednorazove. fuck you if you don't like it
+	$self->get_url('http://www.okoun.cz/updateUser.do', 1, [oldPassword=>"", passwordFirst=>"", passwordSecond=>"", email=>'fff@fdf.cz', homepage=>"", hpDescr=>"", login=>$self->{name}, descr=>$what, articleLimit=>"25", favouritesInRelatedBoards=>"on", refresh=>"2"]) 
+}
+
 sub get_new_favourites {
 	my $self = shift;
 	
@@ -398,7 +406,6 @@ sub new_articles {
 }
 
 
-my %formats = (0=>"plain", 1=>"html", 2=>"radeox");
 sub post {
 	my $self = shift;
 	my $klub = shift;
@@ -414,7 +421,10 @@ sub post {
 	
 	my $club_id = $1;
 	
-	$self->get_url('http://www.okoun.cz/old/postArticle.do', 1, [boardId=>$club_id, parentId=>$parent, title=>encode("utf8", $title), email=>"", body=>encode("utf8", $body), bodyType=>$formats{$format}]) or return 0;
+	print $body."\n";
+	print encode("utf8", $body)."\n";
+	
+	$self->get_url('http://www.okoun.cz/old/postArticle.do', 1, [boardId=>$club_id, parentId=>$parent, title=>$title, email=>"", body=>$body, bodyType=>$format]) or return 0;
 	return 1;
 }
 
